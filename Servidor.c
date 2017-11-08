@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <stdbool.h>
 
 #define NMAXPLAY 20
 
@@ -10,12 +11,13 @@ typedef struct Labirinto{
 } labirinto;
 
 typedef struct Login{
-	const char username[100];
-	const char password[100];
+	char username[100];
+	char password[100];
 } login;
 
 typedef struct Cliente{
 	login l;
+	bool online;
 	double pontuacao;
 	int objetos_por_apanhar;
 } cliente;
@@ -27,20 +29,18 @@ char ** processaComando(char *comando, int *tamCMD){
 	char *  p    = strtok (comando, " ");
 	int n_espacos = 0, i;
 	
-	/* divide a string em palavras */
-	while (p) {
+
+	while (p) { 	/* divide a string em palavras */
 	 cmd = realloc (cmd, sizeof (char*) * ++n_espacos);
 
 	  if (cmd == NULL)
 		exit (-1); /* se alocação de memória falhar */
 
 	  cmd[n_espacos-1] = p;
-
 	  p = strtok (NULL, " ");
 	}
 
 	/* realoca um elemento extra para o "NULL" final */
-
 	cmd = realloc (cmd, sizeof (char*) * (n_espacos+1));
 	cmd[n_espacos] = 0;
 
@@ -49,31 +49,100 @@ char ** processaComando(char *comando, int *tamCMD){
   }
 
 
+/*/login* add(login* v,char *cmd[], int *conta){
+	
+	*conta = *conta + 1;
+    	login *temp = realloc(v,sizeof(login)*(*conta));
+
+	strcpy(temp[*conta-1].username, cmd[1]);
+        strcpy(temp[*conta-1].password, cmd[2]);
+	
+    return temp;
+}/*/
+
+int contaLinhasVezesDois(){
+	
+	int conta=0;
+	char linha[256];
+	FILE *f = fopen("logs.txt","r");
+	
+	while(fgets(linha, sizeof linha, f) != NULL){
+                        conta++;
+        }
+	
+	conta = conta / 2;
+	printf("Pessoas a jogar = %d\n", conta);
+	
+	fclose(f);
+	return conta;
+}
+
+void buscaLogs(login *v){
+
+    int k = 0;
+    FILE *f = fopen("logs.txt","r");
+
+        while(!feof(f)){
+            	fscanf(f, "%s", v[k].username);
+            	fscanf(f, "%s", v[k].password);
+		k++;
+        }
+    fclose(f);
+}
+
+void users(login *v, int conta){
+
+    int k = 0;
+    if(conta == 0){
+        printf("Nao existem Users a jogar\n");
+    }
+	for(k=0;k < conta;k++){
+            printf("%s\n", v[k].username);
+        }
+}
+
+
 void main(int argc, char *argv[]){
 	char *comando = NULL; 
 	comando = malloc(sizeof(char)*20);
 	char **cmd;
 	int *tamCMD, i;
+
+	login *v;	
+	int total = contaLinhasVezesDois();
+    	v = malloc(sizeof(login)*total);	
+	buscaLogs(v);
 	
+
 	while(1){
 		fgets(comando, 25, stdin);
 	
 		cmd = processaComando(comando, tamCMD);
 		
+		if(strncmp(cmd[0], "add", 3)==0){
+			if(*tamCMD == 3){			
+			//v = add(v, cmd, &total); // does not work work work work work
+			}else{
+			printf("Sintaxe ERROR");
+}
+		}
+
+
 		if(strncmp(cmd[0], "game", 4) == 0){
-			
 			if(*tamCMD != 3)
 				printf("Erro de Sintaxe.");
 			else
 				printf("Username: %s\tPassword: %s", cmd[1], cmd[2]);
 			
 		}
+
 		if(strncmp(cmd[0], "users", 5) == 0){
-			if(*tamCMD != 1)
-				printf("Erro de Sintaxe.");
+			if(*tamCMD == 1)
+				users(v, total);
 			else
-				printf("Lista de Users: ...");
+				printf("Erro de Sintaxe.");
 		}
+
 		if(strncmp(cmd[0], "kick", 4) == 0){
 			if(*tamCMD != 2)
 				printf("Erro de Sintaxe. kick <username>");
@@ -93,14 +162,12 @@ void main(int argc, char *argv[]){
 			else
 				printf("Game: ...");
 		}
-		if(strncmp(cmd[0], "shutdown", 8) == 0){
-			printf("%d", sizeof(cmd[0]));
-			if(*tamCMD != 1 && (sizeof(cmd[0]) != sizeof(char) * 8))
-				printf("Erro de Sintaxe.");
-			else
-				break;
-		}
-	}
-	
-	
+		//if(strncmp(cmd[0], "shutdown", 8) == 0){
+		//	printf("%d", sizeof(cmd[0]));
+		//	if(*tamCMD != 1 && (sizeof(cmd[0]) != sizeof(char) * 8))
+		//		printf("Erro de Sintaxe.");
+		//	else
+		//		break;
+		//}
+	}	
 }
