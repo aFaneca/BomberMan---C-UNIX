@@ -20,6 +20,7 @@ typedef struct Cliente{
 	bool online;
 	double pontuacao;
 	int objetos_por_apanhar;
+	int p_id;
 } cliente;
 
 
@@ -28,7 +29,7 @@ char ** processaComando(char *comando, int *tamCMD){
 	char ** cmd  = NULL;
 	char *  p    = strtok (comando, " ");
 	int n_espacos = 0, i;
-	
+
 
 	while (p) { 	/* divide a string em palavras */
 	 cmd = realloc (cmd, sizeof (char*) * ++n_espacos);
@@ -45,34 +46,46 @@ char ** processaComando(char *comando, int *tamCMD){
 	cmd[n_espacos] = 0;
 
 	*tamCMD = n_espacos;
-	return cmd;		
+	return cmd;
   }
 
 
-/*/login* add(login* v,char *cmd[], int *conta){
-	
-	*conta = *conta + 1;
-    	login *temp = realloc(v,sizeof(login)*(*conta));
+login* add(login* v,char *cmd[],int *conta){
 
-	strcpy(temp[*conta-1].username, cmd[1]);
-        strcpy(temp[*conta-1].password, cmd[2]);
-	
-    return temp;
-}/*/
+		int i = 0;
+		int flag = 0;
+		for(i = 0; i < *conta; i++){
+			if(strcmp(cmd[1], v[i].username) == 0){
+				printf("Username existente!!\n");
+				flag = 1;
+			}
+		}
 
-int contaLinhasVezesDois(){
-	
+		if(flag == 0){
+			*conta++;
+    			login *temp = realloc(v,sizeof(login)*(*conta));
+			printf("Adicionado User Nº%d --> %s\n",*conta, cmd[1]);
+			strcpy(temp[*conta-1].username, cmd[1]);
+        		strcpy(temp[*conta-1].password, cmd[2]);
+			return temp;
+		}else{
+			return v;
+		}
+}
+
+int contaLinhas(){
+
 	int conta=0;
 	char linha[256];
 	FILE *f = fopen("logs.txt","r");
-	
-	while(fgets(linha, sizeof linha, f) != NULL){
+
+	while(fgets(linha, sizeof(linha), f) != NULL){
                         conta++;
         }
-	
+
 	conta = conta / 2;
 	printf("Pessoas a jogar = %d\n", conta);
-	
+
 	fclose(f);
 	return conta;
 }
@@ -103,37 +116,37 @@ void users(login *v, int conta){
 
 
 void main(int argc, char *argv[]){
-	char *comando = NULL; 
+	char *comando = NULL;
 	comando = malloc(sizeof(char)*20);
 	char **cmd;
 	int *tamCMD, i;
 
-	login *v;	
-	int total = contaLinhasVezesDois();
-    	v = malloc(sizeof(login)*total);	
+	login *v;
+	int total = contaLinhas();
+    	v = malloc(sizeof(login)*total);
 	buscaLogs(v);
-	
+
 
 	while(1){
 		fgets(comando, 25, stdin);
-	
-		cmd = processaComando(comando, tamCMD);
-		
-		if(strncmp(cmd[0], "add", 3)==0){
-			if(*tamCMD == 3){			
-			//v = add(v, cmd, &total); // does not work work work work work
-			}else{
-			printf("Sintaxe ERROR");
-}
-		}
 
+		cmd = processaComando(comando, tamCMD);
+
+		if(strncmp(cmd[0], "add", 3)==0){
+			if(*tamCMD == 3){
+				//v = add(v, cmd, total);
+				//users(v, total);
+
+			}else{
+				printf("Sintaxe ERROR");
+			}
+		}
 
 		if(strncmp(cmd[0], "game", 4) == 0){
 			if(*tamCMD != 3)
 				printf("Erro de Sintaxe.");
 			else
-				printf("Username: %s\tPassword: %s", cmd[1], cmd[2]);
-			
+				printf("Username: %s", cmd[1]);
 		}
 
 		if(strncmp(cmd[0], "users", 5) == 0){
@@ -149,7 +162,7 @@ void main(int argc, char *argv[]){
 			else
 				printf("User kickado: ...");
 		}
-		
+
 		if(strncmp(cmd[0], "map", 3) == 0){
 			if(*tamCMD != 2)
 				printf("Erro de Sintaxe. kick <nome-ficheiro>");
@@ -162,12 +175,11 @@ void main(int argc, char *argv[]){
 			else
 				printf("Game: ...");
 		}
-		//if(strncmp(cmd[0], "shutdown", 8) == 0){
-		//	printf("%d", sizeof(cmd[0]));
-		//	if(*tamCMD != 1 && (sizeof(cmd[0]) != sizeof(char) * 8))
-		//		printf("Erro de Sintaxe.");
-		//	else
-		//		break;
-		//}
-	}	
+		if(strncmp(cmd[0], "shutdown", 8) == 0){
+            if(*tamCMD != 1 || strlen(cmd[0]) != 9)
+				printf("Erro de Sintaxe.");
+			else
+				break;
+        }
+	}
 }
