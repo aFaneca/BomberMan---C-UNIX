@@ -2,28 +2,26 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <stdbool.h>
-
 
 typedef struct Labirinto {
-	char paredes[20][30];
+	char maze[20][30];
+	int numObjetosPontos;
+	int numObjetosDest;
 } labirinto;
 
-typedef struct Login {
+typedef struct Jogador {
 	char username[100];
 	char password[100];
-} login;
-
-typedef struct Cliente {
-	login l;
-	bool online;
-	double pontuacao;
-	int objetos_por_apanhar;
-	int p_id;
-} cliente;
+	int online;
+	int pontuacao;
+} jogador;
 
 char ** processaComando(char *comando, int *tamCMD);
-void users(login *v, int conta);
-int contaLinhas();
-void buscaLogs(login *v);
-login* add(login* v, char *cmd[], int *conta);
+void users(jogador *v, int conta);
+void buscaLogs(jogador *v);
+void gameInfo(jogador *v, int conta);
+int contaPlayers();
+jogador* add(jogador* v, char *cmd[], int *conta);
+jogador* kick(jogador *v, char *cmd[], int conta);
+
+// void buscaMapInfo(labirinto *mv);

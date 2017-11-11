@@ -1,0 +1,25 @@
+# depslib dependency file v1.0
+1510423023 source:/media/sf_vboxpartilha/TPSO/Servidor~/Servidor/main.c
+	"header.h"
+
+1510423023 /media/sf_vboxpartilha/TPSO/Servidor~/Servidor/header.h
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<unistd.h>
+
+1510423023 source:/media/sf_vboxpartilha/TPSO/Servidor~/Servidor/processamento.c
+	"header.h"
+
+1510426122 source:/media/sf_vboxpartilha/TPSO/Projeto/Servidor/main.c
+	"header.h"
+
+1510426374 source:/media/sf_vboxpartilha/TPSO/Projeto/Servidor/processamento.c
+	"header.h"
+
+1510423023 /media/sf_vboxpartilha/TPSO/Projeto/Servidor/header.h
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<unistd.h>
+
