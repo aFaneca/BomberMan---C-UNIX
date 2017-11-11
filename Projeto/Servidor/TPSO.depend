@@ -1,0 +1,25 @@
+# depslib dependency file v1.0
+1510341856 source:/media/sf_vboxpartilha/TPSO/Projeto/TPSO/main.c
+	<stdio.h>
+	<stdlib.h>
+
+1510360662 source:/media/sf_vboxpartilha/TPSO/Projeto/Servidor/main.c
+	"header.h"
+
+1510350598 source:/home/tony/Desktop/Untitled1.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<unistd.h>
+	<stdbool.h>
+
+1510360677 source:/media/sf_vboxpartilha/TPSO/Projeto/Servidor/processamento.c
+	"header.h"
+
+1510360532 /media/sf_vboxpartilha/TPSO/Projeto/Servidor/header.h
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<unistd.h>
+	<stdbool.h>
+
