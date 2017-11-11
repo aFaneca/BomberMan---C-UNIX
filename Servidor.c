@@ -146,55 +146,47 @@ void main(int argc, char *argv[]) {
 		fgets(comando, 25, stdin);
 
 		cmd = processaComando(comando, &tamCMD);
-		//printf("%s %d", cmd[0], tamCMD);
 
 		if (strncmp(cmd[0], "add", 3) == 0) {
-			if (tamCMD == 3) {
+			if (tamCMD == 3 || strlen(cmd[0]) != 4) {
 				v = add(v, cmd, &total);
 				users(v, total);
 
 			}
 			else {
-				printf("Sintaxe ERROR");
+				printf("Erro de Sintaxe. <add 'username' 'password'>\n");
 			}
 		}
 
-		if (strncmp(cmd[0], "game", 4) == 0) {
-			if (tamCMD != 3)
-				printf("Erro de Sintaxe.");
-			else
-				printf("Username: %s", cmd[1]);
-		}
-
 		if (strncmp(cmd[0], "users", 5) == 0) {
-			if (tamCMD == 1)
+			if (tamCMD == 1 || strlen(cmd[0]) != 6)
 				users(v, total);
 			else
-				printf("Erro de Sintaxe.");
+				printf("Erro de Sintaxe. <users>\n");
 		}
 
 		if (strncmp(cmd[0], "kick", 4) == 0) {
-			if (tamCMD != 2)
-				printf("Erro de Sintaxe. kick <username>");
+			if (tamCMD != 2 || strlen(cmd[0]) != 5)
+				printf("Erro de Sintaxe. kick <username>\n");
 			else
 				printf("User kickado: ...");
 		}
 
 		if (strncmp(cmd[0], "map", 3) == 0) {
-			if (tamCMD != 2)
-				printf("Erro de Sintaxe. kick <nome-ficheiro>");
+			if (tamCMD != 2 || strlen(cmd[0]) != 4)
+				printf("Erro de Sintaxe. map <nome-ficheiro>\n");
 			else
 				printf("Mapa Carregado ...");
 		}
 		if (strncmp(cmd[0], "game", 4) == 0) {
-			if (tamCMD != 1)
-				printf("Erro de Sintaxe.");
+			if (tamCMD != 1 || strlen(cmd[0]) != 5)
+				printf("Erro de Sintaxe. <game>\n");
 			else
 				printf("Game: ...");
 		}
 		if (strncmp(cmd[0], "shutdown", 8) == 0) {
 			if (tamCMD != 1 || strlen(cmd[0]) != 9)
-				printf("Erro de Sintaxe.");
+				printf("Erro de Sintaxe. <shutdown>\n");
 			else
 				break;
 		}
