@@ -19,9 +19,9 @@ typedef struct Jogador {
 char ** processaComando(char *comando, int *tamCMD);
 void users(jogador *v, int conta);
 void buscaLogs(jogador *v);
-void gameInfo(jogador *v, int conta);
+void gameInfo(jogador *v,labirinto *mv, int conta, int nMapas);
 int contaPlayers();
 jogador* add(jogador* v, char *cmd[], int *conta);
 jogador* kick(jogador *v, char *cmd[], int conta);
 
-// void buscaMapInfo(labirinto *mv);
+void buscaMapInfo(labirinto *mv, int nMapas);
