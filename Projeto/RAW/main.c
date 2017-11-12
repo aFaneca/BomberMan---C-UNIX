@@ -2,7 +2,7 @@
 #define NMAXPLAY 20
 
 
-void main(int argc, char *argv[]) {
+int main(int argc, char *argv[]) {
 	char **cmd;
 	char *comando = NULL;
 	comando = malloc(sizeof(char) * 20);
@@ -13,16 +13,18 @@ void main(int argc, char *argv[]) {
 	v = malloc(sizeof(jogador)*total);
 	buscaLogs(v);
 
-	/*/
+	
 	labirinto *mv;
 	mv = malloc(sizeof(labirinto));
-	buscaMapInfo(mv);
-	/*/
+	int nMapas = 1;
+	buscaMapInfo(mv, nMapas);
+	
+	int flag = 0;
 
-	while (1) {
+	while (flag == 0) {
 		if (stdin == NULL) {
 			printf("Erro a abrir ficheiro3.");
-			return 1;
+			flag = 1;
 		}
         printf("\n> ");
 		fgets(comando, 25, stdin);
@@ -58,13 +60,15 @@ void main(int argc, char *argv[]) {
 			}
 		}else if (strcmp(cmd[0], "game") == 0) {
 			if (tamCMD == 1){
-				gameInfo(v, total);
+				gameInfo(v, mv, total, nMapas);
 			}else{
 				printf("Erro de Sintaxe. <game>\n");
 			}
 		}
 		else if (strcmp(cmd[0], "shutdown") == 0) {
 			if (tamCMD == 1){
+				free(v);
+				free(mv);
 				break;
 			}
 			else{
