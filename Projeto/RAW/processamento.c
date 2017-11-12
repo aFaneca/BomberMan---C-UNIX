@@ -18,7 +18,7 @@ char ** processaComando(char *comando, int *tamCMD) {
 		p = strtok(NULL, " ");
 	}
 
-	// Está feio?! Está lindo porque funciona!!! <3
+
 
 	char lastWord[25];
 	char lastWord2[25];
