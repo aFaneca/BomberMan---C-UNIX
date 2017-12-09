@@ -10,7 +10,6 @@
 #define TAM 25
 
 
-
 typedef struct Labirinto {
 	char maze[20][30];
 	int numObjetosPontos;
@@ -22,13 +21,13 @@ typedef struct Jogador {
 	char password[100];
 	int online;
 	int pontuacao;
+	char lastKnownPid[100];
 } jogador;
 
 typedef struct mensagem{
 	char op1[TAM], op2[TAM], op3[TAM], op4[TAM], op5[TAM];
 	char resposta[200];
     char endereco[20];
-    struct campo *campojogo;
     int desliga;
 }MENSAGEM;
 
@@ -36,10 +35,14 @@ typedef struct dados_pipes{
 	char qual[10];
 	int fd;
 } ThrDados;
+
 jogador *v;
 int fd_servidor, fd_cliente, n;
 MENSAGEM msg;
-int validaLogin(char user[], char pass[]);
+
+void grava();
+jogador* updateSaida();
+int validaLogin(char user[], char pass[], char end[]);
 char ** processaComando(char *comando, int *tamCMD);
 void users( int conta);
 void buscaLogs(char ficheiroLogin[]);

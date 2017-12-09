@@ -1,58 +1,113 @@
 #include "servidor.h"
 
-
-int validaLogin(char user[], char pass[]){
+int validaLogin(char user[], char pass[], char end[]){
 	int total = contaPlayers();
+	
 	for(int i = 0; i < total; i++){
 		if(!strcmp(user, v[i].username)){
-			if(!strcmp(pass, v[i].password))
-			   return 1;
+			if(!strcmp(pass, v[i].password)){
+				if(v[i].online == 0){
+					v[i].online = 1;
+					strcpy(v[i].lastKnownPid, end);
+					grava();
+					strcpy(msg.resposta,"Credenciais validas.");
+					return 1;
+				}else{
+					strcpy(msg.resposta,"User já se encontra a jogar");
+					return 0;
+				}
+			}
 			else
-			   return 0;
+				strcpy(msg.resposta,"Credenciais invalidas.");
+				return 0;
 		}
 	}
-	
+	strcpy(msg.resposta,"Credenciais invalidas.");
 	return 0;
 }
 
+
+void grava(){
+	
+	int total = contaPlayers();
+	remove("logs.txt");
+	int i = 0;
+
+	
+	
+	FILE *f = fopen("logs.txt", "w");
+	
+		for(i = 0; i < total; i++){ 
+			fprintf(f, "%s\n", v[i].username);
+			fprintf(f, "%s\n", v[i].password);
+			fprintf(f, "%d\n", v[i].online);
+			fprintf(f, "%d\n", v[i].pontuacao);
+		}
+	
+	total = contaPlayers();
+	fclose(f);
+}
+
+jogador* updateSaida(char end[]){
+	
+	int i;
+	int total = contaPlayers();
+	printf("%d\n", total);
+	
+	for(i = 0; i < total; i++){
+		if(strcmp(v[i].lastKnownPid, end)==0){
+			v[i].online = 0;
+			printf("Confirmed");
+			grava();
+			return v;
+		}
+	}
+	
+	return v;
+}
+
+
 void *processaPedidos(void *arg){
-	while(1){	
+	
+	while(1){
+		
 		n = read(fd_servidor, &msg, sizeof(msg)); /* RECEBER PEDIDO NA "CP" DO SERVIDOR - MINHA (n = read();) */	
-			if(n == -1)
+			printf("----%s----", msg.op1);	
+		
+		if(n == -1)
 				perror("\n[SERVIDOR] Erro a ler pedidos...\n");
 
 		if(strcmp(msg.op1,"test")==0){
 			strcpy(msg.resposta,"FUNCIONA\n");
 			printf("[SERVIDOR] Teste funcionou [%s]\n", msg.endereco);
+			
 		}else if(strcmp(msg.op1,"sair")==0){
 			strcpy(msg.resposta,"O Jogador abandonou o jogo.\n");
+			
+			v = updateSaida(msg.endereco);
 			printf("[SERVIDOR] Servidor confirma que o jogador [%s] abandonou o jogo\n", msg.endereco);
+			
+			
 		}else if(strcmp(msg.op1,"novo")==0){
 			strcpy(msg.resposta,"Bem-vindo ao jogo.\n");
 			printf("[SERVIDOR] [%s] entrou no jogo.\n", msg.endereco);
+			
 		}else if(strcmp(msg.op1,"login")==0){
-			if(validaLogin(msg.op2, msg.op3) == 1){
-				printf("[SERVIDOR] Credenciais do cliente %s validadas com sucesso.\n", msg.endereco);
-				strcpy(msg.resposta,"Credenciais validas.\n");
-				printf("%s", msg.resposta);
+			if(validaLogin(msg.op2, msg.op3, msg.endereco) == 1){
+				printf("[SERVIDOR] Credenciais do cliente [%s] validadas com sucesso.\n", msg.endereco);
+
 				strcpy(msg.op4, "s");
+				
 			}else{
 				printf("[SERVIDOR] Credenciais do cliente %s invalidas.\n", msg.endereco);
-				strcpy(msg.resposta,"Credenciais invalidas.\n");
-				printf("%s", msg.resposta);
 				strcpy(msg.op4, "n");
 			}
 		}
 			
-		
-		/* ABRIR "CP" DO CLIENTE (open - O_WRONLY) */
-		fd_cliente = open(msg.endereco, O_WRONLY);
-		/* ENVIAR RESPOSTA PARA A "CP" DO CLIENTE (write) */
-		write(fd_cliente, &msg, sizeof(msg));
-		/* FECHAR "CP" DO CLIENTE (close) */
-		close(fd_cliente);
+		fd_cliente = open(msg.endereco, O_RDWR); 	// ABRIR "CP" DO CLIENTE (open - O_WRONLY)
+		write(fd_cliente, &msg, sizeof(msg)); 		// ENVIAR RESPOSTA PARA A "CP" DO CLIENTE (write)
+		close(fd_cliente); 							// FECHAR "CP" DO CLIENTE (close)
 	}
-	return NULL;
 }
 
 
@@ -73,8 +128,6 @@ char ** processaComando(char *comando, int *tamCMD) {
 		cmd[n_espacos - 1] = p;
 		p = strtok(NULL, " ");
 	}
-
-
 
 	char lastWord[25];
 	char lastWord2[25];
@@ -101,6 +154,7 @@ void buscaLogs(char ficheiroLogin[]) {
 		fscanf(f, "%s", v[k].password);
 		fscanf(f, "%d", &v[k].online);
 		fscanf(f, "%d", &v[k].pontuacao);
+		strcpy(v[k].lastKnownPid, "");
 		k++;
 	}
 	fclose(f);

@@ -1,8 +1,6 @@
 #include "servidor.h"
 #define NMAXPLAY 20
 
-
-
 int main(int argc, char *argv[]) {
 	char **cmd;
 	char *comando = NULL;
@@ -71,6 +69,11 @@ int main(int argc, char *argv[]) {
 		else if (strcmp(cmd[0], "kick") == 0) {
 			if (tamCMD == 2){
 				v = kick(cmd, total);
+				strcpy(msg.op1, cmd[1]);
+				printf("%s", msg.op1);
+				
+				
+				
 			}else{
 				printf("Erro de Sintaxe. kick <username>\n");
 			}
@@ -93,14 +96,9 @@ int main(int argc, char *argv[]) {
 				free(v);
 				free(mv);
 				printf("[SERVIDOR] SERVIDOR DESLIGADO\n");
-
-    			/* FECHAR "CP" DO SERVIDOR */
-    			close(fd_servidor);
-    			/* REMOVER "CP" DO SERVIDOR */
-    			unlink("CPservidor");
-				
+    			close(fd_servidor); 	// FECHAR "CP" DO SERVIDOR
+    			unlink("CPservidor"); 	// REMOVER "CP" DO SERVIDOR
     			exit(0);
-				
 			}
 			else{
 				printf("Erro de Sintaxe. <shutdown>\n");

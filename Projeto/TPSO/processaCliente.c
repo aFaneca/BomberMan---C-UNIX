@@ -4,7 +4,6 @@
 int login(){
 	
 	char user[50], pass[50];
-	MENSAGEM msg;
 	
 	printf("\nUser: ");
     fgets(user, 50, stdin);
@@ -18,18 +17,11 @@ int login(){
     strcpy(msg.op2, user);
     strcpy(msg.op3, pass);
 	
-	/* ENVIAR PEDIDO PARA "CP" DO SERVIDOR (write) */
-    write(fd_servidor, &msg, sizeof(msg));
-    /* ABRIR "CP" DO CLIENTE (open - O_RDONLY) */
-    fd_cliente = open(msg.endereco, O_RDONLY);
-     /* RECEBER RESPOSTA NA "CP" DO CLIENTE (read) */
-	read(fd_cliente, &msg, sizeof(msg));//ver recebimento.
-    /* FECHAR "CP" DO CLIENTE - MINHA (close) */
-    close(fd_cliente);
-     //FAZER RECEBIMENTO - PERGUNTAR AO ZÉ A IMPLEMENTACAO
-	printf("ASDAS");
-    printf("%s\n", msg.resposta);//ver recebimento
-	
+    write(fd_servidor, &msg, sizeof(msg)); 		// ENVIAR PEDIDO PARA "CP" DO SERVIDOR (write)
+    fd_cliente = open(msg.endereco, O_RDONLY); 	// ABRIR "CP" DO CLIENTE (open - O_RDONLY)
+	read(fd_cliente, &msg, sizeof(msg));		// RECEBER RESPOSTA NA "CP" DO CLIENTE (read)
+    close(fd_cliente); 							// FECHAR "CP" DO CLIENTE - MINHA (close)
+    printf("%s\n", msg.resposta);     			//FAZER RECEBIMENTO
 	if(strcmp(msg.op4, "n") == 0)
 		return 0;
 	else
@@ -54,8 +46,6 @@ char ** processaComando(char *comando, int *tamCMD) {
 		cmd[n_espacos - 1] = p;
 		p = strtok(NULL, " ");
 	}
-
-
 
 	char lastWord[25];
 	char lastWord2[25];
