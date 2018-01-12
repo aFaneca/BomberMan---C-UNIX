@@ -64,11 +64,9 @@ int main(int argc, char *argv[]) {
 		for(i = 0; i < strlen(comandoCopia) - 1; i++){
 			comando[i] = comandoCopia[i];
 		}
-			printf("%s\n", comando);
 			
 			comando[strlen(comandoCopia)-1] = '\0';
 		
-			printf("%s", comando);
 			cmd = processaComando(comando, &tamCMD);
 
 		
@@ -114,11 +112,10 @@ int main(int argc, char *argv[]) {
 		else if (strcmp(cmd[0], "shutdown") == 0) {
 			if (tamCMD == 1){
 				free(mv);
-				printf("AQUI");
+				
 				printf("[SERVIDOR] SERVIDOR DESLIGADO\n");
     			close(fd_servidor); 	// FECHAR "CP" DO SERVIDOR
     			unlink("CPservidor"); 	// REMOVER "CP" DO SERVIDOR
-				printf("AQUI");
 				raise(SIGUSR1);
 			}
 			else{

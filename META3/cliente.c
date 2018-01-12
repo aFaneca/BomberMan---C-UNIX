@@ -38,7 +38,7 @@ int main(int argc, char *argv[]) {
 		printf("\n> ");
 		fgets(comando, 25, stdin);
 		cmd = processaComando(comando, &tamCMD);
-		if (strcmp(cmd[0], "test") ==0) {
+		if (strcmp(cmd[0], "test") == 0) {
 			strcpy(msg.op1, cmd[0]); 	
 			
             write(fd_servidor, &msg, sizeof(msg)); 		// ENVIAR PEDIDO PARA "CP" DO SERVIDOR (write) 	
@@ -47,7 +47,20 @@ int main(int argc, char *argv[]) {
             close(fd_cliente); 							// FECHAR "CP" DO CLIENTE - MINHA (close)
             
             printf("%s\n", msg.resposta);				//FAZER RECEBIMENTO
-		}else if (strcmp(cmd[0], "sair") ==0) {
+		}else if (strcmp(cmd[0], "iniciar") == 0) {
+			strcpy(msg.op1, cmd[0]); 	
+			
+            write(fd_servidor, &msg, sizeof(msg)); 					  // ENVIAR PEDIDO PARA "CP" DO SERVIDOR (write) 	
+            fd_cliente = open(msg.endereco, O_RDONLY); 				 // ABRIR "CP" DO CLIENTE (open - O_RDONLY)
+			read(fd_cliente, &msg, sizeof(msg));		// RECEBER RESPOSTA NA "CP" DO CLIENTE (read)
+            close(fd_cliente); 									   // FECHAR "CP" DO CLIENTE - MINHA (close)
+            
+            //printf("%s\n", msg.resposta);	
+			iniciarJogo();
+		}
+		
+		
+		else if (strcmp(cmd[0], "sair") ==0) {
 			strcpy(msg.op1, cmd[0]);	
 			
             write(fd_servidor, &msg, sizeof(msg)); 		// ENVIAR PEDIDO PARA "CP" DO SERVIDOR (write)
@@ -59,3 +72,5 @@ int main(int argc, char *argv[]) {
 		}
 	}
 }
+
+

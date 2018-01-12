@@ -140,12 +140,11 @@ jogador* updateSaida(char end[]){
 	
 	int i;
 	int total = contaPlayersRegistados();
-	printf("%d\n", total);
+
 	
 	for(i = 0; i < total; i++){
 		if(strcmp(v[i].nomeDoFicheiro, end)==0){
 			v[i].online = 0;
-			printf("Confirmed");
 			grava();
 			return v;
 		}
@@ -216,7 +215,6 @@ void sinalizaFim(){
 	int conta = contaPlayersRegistados();
 	int k = 0;
 	
-	printf("AQUI");
 	if (conta == 0) {
 		printf("Nao existem Users a jogar\n");
 	}
@@ -228,7 +226,7 @@ void sinalizaFim(){
 			v[k].online = 0;	
 		}
 	}
-	printf("AQUI");
+
 	grava();
 }
 
@@ -257,9 +255,7 @@ void sinalizaKick(){
 void trata(int sinal){
 	
 	if(sinal == SIGUSR1){
-		printf("AQUI");
 		printf("A terminar o programa. A informar clientes ativos...\n");
-		printf("\nAQUI2");
 		
 		if(usersOn() > 0){
 			sinalizaFim();
@@ -279,8 +275,44 @@ void trata(int sinal){
 }
 
 
-//---------PROCESSAMETO-DE-PEDIDOS---------//
 
+void updateLabirinto(){
+	int colunas = sizeof(msg.lab.maze[0]) / sizeof(char);
+	int linhas = sizeof(msg.lab.maze) / colunas;
+	char letraLida[colunas];
+	
+	FILE *f = fopen("mapa1.txt", "r");
+	if (f == NULL) {
+		printf( "Erro a abrir labirinto.");
+	}
+	printf("5");
+	
+	while (!feof(f)) {
+		for(int i = 0; i < linhas; i++){
+				fgets(msg.lab.maze[i], 60, f);
+
+			}	
+	}
+	msg.lab.elementos = malloc(sizeof(char) * (linhas+1)*(colunas + 1));
+	int k = 0;
+	for(int i = 0;i < linhas; i++){
+		for(int j = 0; j < colunas; j++){
+			msg.lab.elementos[k].x = j;
+			msg.lab.elementos[k].y = i;
+			msg.lab.elementos[k].avatar = msg.lab.maze[i][j];
+			k++;
+		}
+	}
+
+	//printf("-->> %d %d %c <<--", msg.lab.elementos[0].x, msg.lab.elementos[0].y, msg.lab.elementos[0].avatar);
+	fclose(f);
+	
+}
+
+
+
+
+//---------PROCESSAMETO-DE-PEDIDOS---------//
 void *processaPedidos(void *arg){
 	
 	while(1){
@@ -294,17 +326,33 @@ void *processaPedidos(void *arg){
 		if(strcmp(msg.op1,"test")==0){
 			strcpy(msg.resposta,"FUNCIONA\n");
 			printf("[SERVIDOR] Teste funcionou [%s]\n", msg.endereco);
-			
+			fd_cliente = open(msg.endereco, O_RDWR); 	// ABRIR "CP" DO CLIENTE (open - O_WRONLY)
+			write(fd_cliente, &msg, sizeof(msg)); 		// ENVIAR RESPOSTA PARA A "CP" DO CLIENTE (write)
+			close(fd_cliente); 	
+		}else if(strcmp(msg.op1,"iniciar")==0){
+			//strcpy(msg.resposta,"...INICIAR...\n");
+			printf("[SERVIDOR] A Iniciar... \n");
+			printf("A");
+			updateLabirinto();
+			printf("B");
+			fd_cliente = open(msg.endereco, O_RDWR); 	// ABRIR "CP" DO CLIENTE (open - O_WRONLY)
+			write(fd_cliente, &msg, sizeof(msg)); 		// ENVIAR RESPOSTA PARA A "CP" DO CLIENTE (write)
+			close(fd_cliente); 
 		}else if(strcmp(msg.op1,"sair")==0){
 			strcpy(msg.resposta,"O Jogador abandonou o jogo.\n");
 			
 			v = updateSaida(msg.endereco);
 			printf("[SERVIDOR] Servidor confirma que o jogador [%s] abandonou o jogo\n", msg.endereco);
-			
+			fd_cliente = open(msg.endereco, O_RDWR); 	// ABRIR "CP" DO CLIENTE (open - O_WRONLY)
+			write(fd_cliente, &msg, sizeof(msg)); 		// ENVIAR RESPOSTA PARA A "CP" DO CLIENTE (write)
+			close(fd_cliente); 	
 			
 		}else if(strcmp(msg.op1,"novo")==0){
 			strcpy(msg.resposta,"Bem-vindo ao jogo.\n");
 			printf("[SERVIDOR] [%s] entrou no jogo.\n", msg.endereco);
+			fd_cliente = open(msg.endereco, O_RDWR); 	// ABRIR "CP" DO CLIENTE (open - O_WRONLY)
+			write(fd_cliente, &msg, sizeof(msg)); 		// ENVIAR RESPOSTA PARA A "CP" DO CLIENTE (write)
+			close(fd_cliente); 	
 			
 		}else if(strcmp(msg.op1,"login")==0){
 			if(validaLogin(msg.op2, msg.op3, msg.endereco) == 1){
@@ -316,13 +364,16 @@ void *processaPedidos(void *arg){
 				printf("[SERVIDOR] Credenciais do cliente %s invalidas.\n", msg.endereco);
 				strcpy(msg.op4, "n");
 			}
+			fd_cliente = open(msg.endereco, O_RDWR); 	// ABRIR "CP" DO CLIENTE (open - O_WRONLY)
+			write(fd_cliente, &msg, sizeof(msg)); 		// ENVIAR RESPOSTA PARA A "CP" DO CLIENTE (write)
+			close(fd_cliente); 	
 		}
 			
-		fd_cliente = open(msg.endereco, O_RDWR); 	// ABRIR "CP" DO CLIENTE (open - O_WRONLY)
-		write(fd_cliente, &msg, sizeof(msg)); 		// ENVIAR RESPOSTA PARA A "CP" DO CLIENTE (write)
-		close(fd_cliente); 							// FECHAR "CP" DO CLIENTE (close)
+								// FECHAR "CP" DO CLIENTE (close)
 	}
 }
+
+
 
 
 //---------PROCESSAMETO-DE-COMANDOS---------//

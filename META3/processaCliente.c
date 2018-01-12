@@ -4,13 +4,13 @@ void trata(int sinal){
 	
 	
 	if(sinal == SIGUSR1){
-		printf("O servidor foi encerrado. A terminar sessão... %d \n", sinal);
+		printf("O servidor foi encerrado. A terminar sessão... \n");
 		unlink(msg.endereco); // REMOVER "CP" DO CLIENTE
     	exit(0);	
 	}
 	
 	if(sinal == SIGUSR2){
-		printf("Sessao Terminada. %d \n", sinal);
+		printf("Sessao Terminada. \n");
 		unlink(msg.endereco); // REMOVER "CP" DO CLIENTE
     	exit(0);
 	}
@@ -84,4 +84,120 @@ char ** processaComando(char *comando, int *tamCMD) {
 	*tamCMD = n_espacos;
 
 	return cmd;
+}
+void mostraLabirinto(){
+	int colunas = sizeof(msg.lab.maze[0]) / sizeof(char);
+	int linhas = sizeof(msg.lab.maze) / colunas;
+	//printf("\n%d %d", linhas, colunas);
+	
+	
+	for(int i = 0; i < linhas; i++){
+		for(int j = 0; j < colunas; j++){
+			mvaddch(i,j,msg.lab.maze[i][j]);
+		}
+	}
+	
+	
+	
+	/*
+	for(int i = 0; i < linhas*colunas; i++){
+		int posx = msg.lab.elementos[0].x;
+		int posy = msg.lab.elementos[0].y;
+		mvaddch(posy,posx,msg.lab.elementos[0].avatar);	
+	}
+	*/
+	
+}
+	
+void iniciarJogo(){
+	
+	
+	WINDOW * janela1;
+    bool fim = false;
+	clear();
+	noecho();
+    cbreak();
+    
+    
+	keypad(janela1, TRUE);
+	//nodelay(janela1, TRUE);
+    //scrollok(janela1, TRUE);
+	char c;
+	int x,y;
+    /*  Initialize ncurses  */
+
+    if ( (janela1 = initscr()) == NULL ) {
+	fprintf(stderr, "Erro a inicializar nCurses...\n");
+	exit(EXIT_FAILURE);
+    }
+/*	
+	while(!fim){
+		werase(janela1);
+		mostraLabirinto();
+		refresh();
+		if(c == 27){
+			fim = true;
+		}
+
+  */      
+      
+	while(!fim){
+		werase(janela1);
+		mostraLabirinto();
+		
+		int ch = wgetch(janela1);
+		if(ch == 'q') fim = true;
+		
+	}
+        
+ /*
+ 	    case KEY_RIGHT:
+        {
+            x++;
+            move(y,x);
+        }
+        case KEY_LEFT:
+        {
+            x--;
+            move(y,x);
+        }
+        case KEY_UP:
+        {
+            y--;
+            move(y,x);
+        }
+        case KEY_DOWN:
+        {
+            y++;
+            move(y,x);
+        }
+        case KEY_EXIT:
+        {
+            printf("Bye");
+			fim = true;
+        }
+        default:
+        {
+            printw("%c",c);
+        }
+*/
+    
+   			 
+	//}
+	
+	
+	
+    /*  Display "Hello, world!" in the centre of the
+	screen, call refresh() to show our changes, and
+	sleep() for a few seconds to get the full screen effect  */
+	
+
+    
+   // sleep(10);
+	echo();
+	// LIMPEZA
+	delwin(janela1);
+	endwin();
+    refresh();
+	
 }
