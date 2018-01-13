@@ -86,24 +86,25 @@ char ** processaComando(char *comando, int *tamCMD) {
 	return cmd;
 }
 void mostraLabirinto(){
-	int colunas = sizeof(msg.lab.maze[0]) / sizeof(char);
-	int linhas = sizeof(msg.lab.maze) / colunas;
-	//printf("\n%d %d", linhas, colunas);
-	
-	
+	int colunas = sizeof(lab->maze[0]) / sizeof(char);
+	int linhas = sizeof(lab->maze) / colunas;
+	printf("\n%d %d", linhas, colunas);
+	//printf("-->> %d %d %c <<--", elem[0].x, elem[0].y, elem[0].avatar);
+	//mvaddch(30,30,msg.lab->maze[0][0]);
+	/*
 	for(int i = 0; i < linhas; i++){
 		for(int j = 0; j < colunas; j++){
-			mvaddch(i,j,msg.lab.maze[i][j]);
+			mvaddch(i,j,msg.lab->maze[i][j]);
 		}
 	}
 	
 	
 	
-	/*
-	for(int i = 0; i < linhas*colunas; i++){
-		int posx = msg.lab.elementos[0].x;
-		int posy = msg.lab.elementos[0].y;
-		mvaddch(posy,posx,msg.lab.elementos[0].avatar);	
+	
+	for(int i = 0; i < 10; i++){
+		int posx = elem[i].x;
+		int posy = elem[i].y;
+		mvaddch(posy,posx,"C");	
 	}
 	*/
 	

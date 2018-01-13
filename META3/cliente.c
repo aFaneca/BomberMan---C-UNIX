@@ -55,7 +55,9 @@ int main(int argc, char *argv[]) {
 			read(fd_cliente, &msg, sizeof(msg));		// RECEBER RESPOSTA NA "CP" DO CLIENTE (read)
             close(fd_cliente); 									   // FECHAR "CP" DO CLIENTE - MINHA (close)
             
-            //printf("%s\n", msg.resposta);	
+            lab = &msg.lab;
+			elem = &lab->elementos;
+			printf("\n-->> ## %d %d %c ## <<--\n", elem[3].x, elem[3].y,elem[3].avatar);
 			iniciarJogo();
 		}
 		

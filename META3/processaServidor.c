@@ -277,34 +277,39 @@ void trata(int sinal){
 
 
 void updateLabirinto(){
-	int colunas = sizeof(msg.lab.maze[0]) / sizeof(char);
-	int linhas = sizeof(msg.lab.maze) / colunas;
+	int colunas = sizeof(msg.lab->maze[0]) / sizeof(char);
+	int linhas = sizeof(msg.lab->maze) / colunas;
 	char letraLida[colunas];
 	
 	FILE *f = fopen("mapa1.txt", "r");
 	if (f == NULL) {
 		printf( "Erro a abrir labirinto.");
 	}
-	printf("5");
-	
+
+	msg.lab = malloc(sizeof (labirinto));
 	while (!feof(f)) {
 		for(int i = 0; i < linhas; i++){
-				fgets(msg.lab.maze[i], 60, f);
+				fgets(msg.lab->maze[i], 60, f);
 
 			}	
 	}
-	msg.lab.elementos = malloc(sizeof(char) * (linhas+1)*(colunas + 1));
+	
+	msg.lab->elementos = malloc(sizeof(char) * (linhas + 1)*(colunas + 1));
+	
 	int k = 0;
 	for(int i = 0;i < linhas; i++){
 		for(int j = 0; j < colunas; j++){
-			msg.lab.elementos[k].x = j;
-			msg.lab.elementos[k].y = i;
-			msg.lab.elementos[k].avatar = msg.lab.maze[i][j];
+			msg.lab->elementos[k].x = j;
+			msg.lab->elementos[k].y = i;
+			
+			msg.lab->elementos[k].avatar = msg.lab->maze[i][j];
+			printf("\n-->> ## %d %d %c ## <<--\n", msg.lab->elementos[k].x, msg.lab->elementos[k].y, msg.lab->elementos[k].avatar);
 			k++;
 		}
 	}
+	
 
-	//printf("-->> %d %d %c <<--", msg.lab.elementos[0].x, msg.lab.elementos[0].y, msg.lab.elementos[0].avatar);
+	//printf("-->> %d %d %c <<--", msg.lab->elementos[1].x, msg.lab->elementos[1].y, msg.lab->elementos[0].avatar);
 	fclose(f);
 	
 }
@@ -330,7 +335,7 @@ void *processaPedidos(void *arg){
 			write(fd_cliente, &msg, sizeof(msg)); 		// ENVIAR RESPOSTA PARA A "CP" DO CLIENTE (write)
 			close(fd_cliente); 	
 		}else if(strcmp(msg.op1,"iniciar")==0){
-			//strcpy(msg.resposta,"...INICIAR...\n");
+			strcpy(msg.resposta,"...INICIAR...\n");
 			printf("[SERVIDOR] A Iniciar... \n");
 			printf("A");
 			updateLabirinto();

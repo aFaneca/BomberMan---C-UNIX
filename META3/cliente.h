@@ -25,16 +25,26 @@ typedef struct Labirinto {
 	elemento *jogadores;
 } labirinto;
 
+typedef struct Jogador {
+	char username[100];
+	char password[100];
+	int online;
+	int pontuacao;
+	char nomeDoFicheiro[100];
+} jogador;
+
+
 typedef struct mensagem{
 	char op1[TAM], op2[TAM], op3[TAM], op4[TAM], op5[TAM];
 	char resposta[200];
     char endereco[20];
-	labirinto lab;
+	labirinto *lab;
 }MENSAGEM;
 
 int fd_servidor, fd_cliente;
 MENSAGEM msg;
-labirinto lab;
+labirinto *lab;
+elemento *elem;
 
 int login();
 char ** processaComando(char *comando, int *tamCMD);
