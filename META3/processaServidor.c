@@ -277,8 +277,8 @@ void trata(int sinal){
 
 
 void updateLabirinto(){
-	int colunas = sizeof(msg.lab->maze[0]) / sizeof(char);
-	int linhas = sizeof(msg.lab->maze) / colunas;
+	int colunas = sizeof(msg.lab.maze[0]) / sizeof(char);
+	int linhas = sizeof(msg.lab.maze) / colunas;
 	char letraLida[colunas];
 	
 	FILE *f = fopen("mapa1.txt", "r");
@@ -286,24 +286,24 @@ void updateLabirinto(){
 		printf( "Erro a abrir labirinto.");
 	}
 
-	msg.lab = malloc(sizeof (labirinto));
+	//msg.lab = malloc(sizeof (labirinto));
 	while (!feof(f)) {
 		for(int i = 0; i < linhas; i++){
-				fgets(msg.lab->maze[i], 60, f);
+				fgets(msg.lab.maze[i], 60, f);
 
 			}	
 	}
 	
-	msg.lab->elementos = malloc(sizeof(char) * (linhas + 1)*(colunas + 1));
+	//msg.lab->elementos = malloc(sizeof(char) * (linhas + 1)*(colunas + 1));
 	
 	int k = 0;
 	for(int i = 0;i < linhas; i++){
 		for(int j = 0; j < colunas; j++){
-			msg.lab->elementos[k].x = j;
-			msg.lab->elementos[k].y = i;
+			msg.lab.elementos[k].x = j;
+			msg.lab.elementos[k].y = i;
 			
-			msg.lab->elementos[k].avatar = msg.lab->maze[i][j];
-			printf("\n-->> ## %d %d %c ## <<--\n", msg.lab->elementos[k].x, msg.lab->elementos[k].y, msg.lab->elementos[k].avatar);
+			msg.lab.elementos[k].avatar = msg.lab.maze[i][j];
+			printf("\n-->> ## %d %d %c ## <<--\n", msg.lab.elementos[k].x, msg.lab.elementos[k].y, msg.lab.elementos[k].avatar);
 			k++;
 		}
 	}
@@ -314,7 +314,13 @@ void updateLabirinto(){
 	
 }
 
-
+void adicionaJogador(){
+	static int i = 0;
+	
+	msg.lab.jogadores[i].x = 1;
+	msg.lab.jogadores[i].y = 1;
+	msg.lab.jogadores[i].avatar = 'A';
+}
 
 
 //---------PROCESSAMETO-DE-PEDIDOS---------//
@@ -337,9 +343,8 @@ void *processaPedidos(void *arg){
 		}else if(strcmp(msg.op1,"iniciar")==0){
 			strcpy(msg.resposta,"...INICIAR...\n");
 			printf("[SERVIDOR] A Iniciar... \n");
-			printf("A");
+			adicionaJogador();
 			updateLabirinto();
-			printf("B");
 			fd_cliente = open(msg.endereco, O_RDWR); 	// ABRIR "CP" DO CLIENTE (open - O_WRONLY)
 			write(fd_cliente, &msg, sizeof(msg)); 		// ENVIAR RESPOSTA PARA A "CP" DO CLIENTE (write)
 			close(fd_cliente); 

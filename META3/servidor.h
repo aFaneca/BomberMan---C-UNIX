@@ -20,8 +20,8 @@ typedef struct Labirinto {
 	char maze[20][30];
 	int numObjetosPontos;
 	int numObjetosDest;
-	elemento *elementos;
-	elemento *jogadores;
+	elemento elementos[1000];
+	elemento jogadores[10];
 } labirinto;
 
 typedef struct Jogador {
@@ -36,7 +36,7 @@ typedef struct mensagem{
 	char op1[TAM], op2[TAM], op3[TAM], op4[TAM], op5[TAM];
 	char resposta[200];
     char endereco[20];
-	labirinto *lab;
+	labirinto lab;
 }MENSAGEM;
 
 typedef struct dados_pipes{

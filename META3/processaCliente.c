@@ -86,52 +86,51 @@ char ** processaComando(char *comando, int *tamCMD) {
 	return cmd;
 }
 void mostraLabirinto(){
-	int colunas = sizeof(lab->maze[0]) / sizeof(char);
-	int linhas = sizeof(lab->maze) / colunas;
+	erase();
+	int colunas = sizeof(lab.maze[0]) / sizeof(char);
+	int linhas = sizeof(lab.maze) / colunas;
+	int nJogadores = sizeof(msg.lab.jogadores)/sizeof(msg.lab.jogadores[0]);
 	printf("\n%d %d", linhas, colunas);
-	//printf("-->> %d %d %c <<--", elem[0].x, elem[0].y, elem[0].avatar);
-	//mvaddch(30,30,msg.lab->maze[0][0]);
-	/*
-	for(int i = 0; i < linhas; i++){
-		for(int j = 0; j < colunas; j++){
-			mvaddch(i,j,msg.lab->maze[i][j]);
-		}
+	
+	//IMPRIME MUNDO
+	for(int i = 0; i < linhas*colunas; i++){
+		int posx = msg.lab.elementos[i].x;
+		int posy = msg.lab.elementos[i].y;
+		char avatar = msg.lab.elementos[i].avatar;
+		mvaddch(posy,posx,avatar);	
 	}
 	
-	
-	
-	
-	for(int i = 0; i < 10; i++){
-		int posx = elem[i].x;
-		int posy = elem[i].y;
-		mvaddch(posy,posx,"C");	
+	//IMPRIME JOGADORES NO MUNDO
+	for(int i = 0; i < nJogadores; i++){
+		int posx = msg.lab.jogadores[i].x;
+		int posy = msg.lab.jogadores[i].y;
+		char avatar = msg.lab.jogadores[i].avatar;
+		mvaddch(posy,posx,avatar);	
 	}
-	*/
+	
 	
 }
 	
 void iniciarJogo(){
 	
-	
-	WINDOW * janela1;
     bool fim = false;
-	clear();
-	noecho();
-    cbreak();
+	//clear();
+	
+    //cbreak();
     
     
-	keypad(janela1, TRUE);
+	//keypad(janela1, TRUE);
 	//nodelay(janela1, TRUE);
     //scrollok(janela1, TRUE);
 	char c;
 	int x,y;
     /*  Initialize ncurses  */
-
-    if ( (janela1 = initscr()) == NULL ) {
-	fprintf(stderr, "Erro a inicializar nCurses...\n");
+/*	
+    if ( (initscr()) == NULL ) {
+		fprintf(stderr, "Erro a inicializar nCurses...\n");
 	exit(EXIT_FAILURE);
     }
-/*	
+
 	while(!fim){
 		werase(janela1);
 		mostraLabirinto();
@@ -141,15 +140,13 @@ void iniciarJogo(){
 		}
 
   */      
-      
-	while(!fim){
-		werase(janela1);
-		mostraLabirinto();
+    initscr();
+	//keypad(stdscr, TRUE);
+	noecho();
+	mostraLabirinto();
+	refresh();
+	
 		
-		int ch = wgetch(janela1);
-		if(ch == 'q') fim = true;
-		
-	}
         
  /*
  	    case KEY_RIGHT:
@@ -195,10 +192,10 @@ void iniciarJogo(){
 
     
    // sleep(10);
-	echo();
+	
 	// LIMPEZA
-	delwin(janela1);
-	endwin();
-    refresh();
+	//delwin();
+	//endwin();
+    
 	
 }

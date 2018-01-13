@@ -54,11 +54,12 @@ int main(int argc, char *argv[]) {
             fd_cliente = open(msg.endereco, O_RDONLY); 				 // ABRIR "CP" DO CLIENTE (open - O_RDONLY)
 			read(fd_cliente, &msg, sizeof(msg));		// RECEBER RESPOSTA NA "CP" DO CLIENTE (read)
             close(fd_cliente); 									   // FECHAR "CP" DO CLIENTE - MINHA (close)
-            
-            lab = &msg.lab;
-			elem = &lab->elementos;
-			printf("\n-->> ## %d %d %c ## <<--\n", elem[3].x, elem[3].y,elem[3].avatar);
+           
+            //lab = &msg.lab;
+			//elem = &lab.elementos;
+			//printf("\n-->> ## %d %d %c ## <<--\n", msg.lab.elementos[3].x, elem[3].y,elem[3].avatar);
 			iniciarJogo();
+			//printf("\n-->> ## %c ## <<--\n", msg.lab.elementos[0].avatar);
 		}
 		
 		
