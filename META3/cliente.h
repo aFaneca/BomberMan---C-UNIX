@@ -50,6 +50,14 @@ typedef struct dados_pipes{
 	int fd;
 } ThrDados;
 
+
+typedef struct expBomba{
+	int x;
+	int y;
+	char tipo;
+	
+} argsBomba;
+
 int fd_servidor, fd_cliente;
 MENSAGEM msg;
 labirinto lab;
@@ -64,3 +72,4 @@ bool validaMovimento (char mov);
 bool estaNaSaida(int x, int y);
 void terminaJogo();
 void lancaBombinha();
+void* explodeBomba(void * dados);

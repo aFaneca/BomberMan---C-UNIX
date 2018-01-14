@@ -322,7 +322,7 @@ void adicionaJogador(){
 	msg.lab.jogadores[i].x = 1;
 	msg.lab.jogadores[i].y = 1;
 	msg.lab.jogadores[i].avatar = 158;
-	msg.lab.jogadores[i].bombinhas = 3;
+	msg.lab.jogadores[i].bombinhas = 300;
 	msg.lab.jogadores[i].megabombas = 2;
 }
 bool temParede(int x, int y){
@@ -451,7 +451,6 @@ bool verificaMovimento(char tipo[]){
 	}
 	else if(tipo[0] == 'b'){
 		if(msg.lab.jogadores[0].bombinhas > 0){
-			msg.lab.jogadores[0].bombinhas--;
 			return true;
 		}
 	}

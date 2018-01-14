@@ -213,12 +213,52 @@ bool posLivre(int x, int y){
 	
 }
 
+
+void* explodeBomba(void * dados){
+	int raio;
+	int colunas = sizeof(msg.lab.maze[0]) / sizeof(char);
+	int linhas = sizeof(msg.lab.maze) / colunas;
+	argsBomba *x1 = (argsBomba *) dados;
+	char tipo = x1->tipo;
+	int x = x1->x;
+	int y = x1->y;
+	if(tipo == 'b')
+		raio = 2;
+	else if(tipo == 'm')
+		raio = 4;
+	
+	sleep(2);
+	// MOSTRAR RAIO EXPLOSAO
+	//sleep(2);
+	for(int i = 0; i < linhas * colunas; i++){
+			int posx = msg.lab.elementos[i].x;
+			int posy = msg.lab.elementos[i].y;
+			char avatar = msg.lab.elementos[i].avatar;
+			
+		for(int h = 0; h < raio + 1; h++){
+				if((posx == x && posy == y + h) || (posx == x && posy == y - h) || (posx == x + h && posy == y) || (posx == x - h && posy == y)){
+					if(avatar == 'D' || avatar == 'X' || avatar == 'J' || avatar == (char)158 || avatar == 'b'){ // D - Blocos Destrutiveis | X - Inimigos | J - Outros Jogadores | A - ELE PROPRIO
+						// EXPLODIR
+						msg.lab.elementos[i].avatar = ' ';
+					}
+				}
+		}
+		
+
+	
+	}
+	
+	return NULL;
+}
+
 void lancaBombinha(){
 	int posx = msg.lab.jogadores[0].x;
 	int posy = msg.lab.jogadores[0].y;
 	int bX, bY;
 	int movimento = msg.lab.jogadores[0].ultimoMovimento;
 	bool podeLancar = false;
+	pthread_t bomba;
+	argsBomba *args_bomba = (argsBomba *) malloc(sizeof(argsBomba));
 	
 	if(movimento == 'w'){
 		bX = posx; bY = posy - 1;
@@ -249,8 +289,17 @@ void lancaBombinha(){
 			int posx1 = msg.lab.elementos[i].x;
 			int posy1 = msg.lab.elementos[i].y;
 			char avatar = msg.lab.elementos[i].avatar;
-			if(posx1 == bX && posy1 == bY)
+			if(posx1 == bX && posy1 == bY){
 				msg.lab.elementos[i].avatar = 'b';
+				msg.lab.jogadores[0].bombinhas--;
+				mostraLabirinto();
+				refresh();
+				args_bomba->x = bX;
+				args_bomba->y = bY;
+				args_bomba->tipo = 'b';
+				//explodeBomba('b', bX, bY);
+				pthread_create(&bomba, NULL, &explodeBomba, (void *) args_bomba);
+			}
 		}
 	}
 }
@@ -279,9 +328,7 @@ void iniciarJogo(){
 	clear();
 	curs_set(0);
 	move(1,1);
-    /*  Display "Hello, world!" in the centre of the
-	screen, call refresh() to show our changes, and
-	sleep() for a few seconds to get the full screen effect  */
+
 	while(continuar){
 		clear();
 		mostraLabirinto();
@@ -291,30 +338,30 @@ void iniciarJogo(){
 			char c = wgetch(janela);
 			if(c == 'q'){continuar = false; break;}
 			if(c == 'w'){
+				msg.lab.jogadores[0].ultimoMovimento = 'w';	
 				if(validaMovimento('w')){
 					msg.lab.jogadores[0].y--; 
-					msg.lab.jogadores[0].ultimoMovimento = 'w';	
 					break;
 				}
 			}
 			if(c == 's'){
+				msg.lab.jogadores[0].ultimoMovimento = 's';	
 				if(validaMovimento('s')){
 					msg.lab.jogadores[0].y++; 
-					msg.lab.jogadores[0].ultimoMovimento = 's';	
 					break;
 				}
 			}
 			if(c == 'a'){
+				msg.lab.jogadores[0].ultimoMovimento = 'a';	
 				if(validaMovimento('a')){
 					msg.lab.jogadores[0].x--;
-					msg.lab.jogadores[0].ultimoMovimento = 'a';	
 					break;
 				}
 			}
 			if(c == 'd'){
+				msg.lab.jogadores[0].ultimoMovimento = 'd';	
 				if(validaMovimento('d')){
 					msg.lab.jogadores[0].x++;
-					msg.lab.jogadores[0].ultimoMovimento = 'd';	
 					break;
 				}
 			}
@@ -322,6 +369,7 @@ void iniciarJogo(){
 				if(validaMovimento('b')){
 					//msg.lab.jogadores[0].x++;
 					lancaBombinha();
+					
 					break;
 				}
 			}
@@ -335,3 +383,4 @@ void iniciarJogo(){
     endwin();
     refresh();
 }
+
