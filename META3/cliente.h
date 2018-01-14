@@ -15,11 +15,15 @@
 typedef struct Elemento {
 	int x, y;
 	char avatar;
+	int bombinhas;
+	int megabombas;
+	char ultimoMovimento;
 } elemento;
 
 typedef struct Labirinto {
 	char maze[20][30];
 	int numObjetosPontos;
+	int totalObjetos;
 	int numObjetosDest;
 	elemento elementos[1000];
 	elemento jogadores[25];
@@ -41,6 +45,11 @@ typedef struct mensagem{
 	labirinto lab;
 }MENSAGEM;
 
+typedef struct dados_pipes{
+	char qual[10];
+	int fd;
+} ThrDados;
+
 int fd_servidor, fd_cliente;
 MENSAGEM msg;
 labirinto lab;
@@ -51,3 +60,7 @@ char ** processaComando(char *comando, int *tamCMD);
 void trata(int sinal);
 void mostraLabirinto();
 void iniciarJogo();
+bool validaMovimento (char mov);
+bool estaNaSaida(int x, int y);
+void terminaJogo();
+void lancaBombinha();

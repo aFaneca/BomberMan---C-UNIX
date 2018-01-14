@@ -277,6 +277,7 @@ void trata(int sinal){
 
 
 void updateLabirinto(){
+	
 	int colunas = sizeof(msg.lab.maze[0]) / sizeof(char);
 	int linhas = sizeof(msg.lab.maze) / colunas;
 	char letraLida[colunas];
@@ -303,6 +304,7 @@ void updateLabirinto(){
 			msg.lab.elementos[k].y = i;
 			
 			msg.lab.elementos[k].avatar = msg.lab.maze[i][j];
+			if(msg.lab.elementos[k].avatar == 'P') msg.lab.totalObjetos++;
 			printf("\n-->> ## %d %d %c ## <<--\n", msg.lab.elementos[k].x, msg.lab.elementos[k].y, msg.lab.elementos[k].avatar);
 			k++;
 		}
@@ -319,9 +321,143 @@ void adicionaJogador(){
 	
 	msg.lab.jogadores[i].x = 1;
 	msg.lab.jogadores[i].y = 1;
-	msg.lab.jogadores[i].avatar = 'A';
+	msg.lab.jogadores[i].avatar = 158;
+	msg.lab.jogadores[i].bombinhas = 3;
+	msg.lab.jogadores[i].megabombas = 2;
+}
+bool temParede(int x, int y){
+	/*if(msg.lab.maze[x][y] == '0')
+		return false;
+	return true;
+*/
+	int colunas = sizeof(msg.lab.maze[0]) / sizeof(char);
+	int linhas = sizeof(msg.lab.maze) / colunas;
+	
+	for(int i = 0; i < linhas * colunas; i++){
+			int posx = msg.lab.elementos[i].x;
+			int posy = msg.lab.elementos[i].y;
+			char avatar = msg.lab.elementos[i].avatar;
+			if(posx == x && posy == y && (avatar == '0' || avatar == 'S' || avatar == 'D'))
+				return true;
+	}
+	
+	return false;
 }
 
+bool temObjeto(int x, int y){
+	int colunas = sizeof(msg.lab.maze[0]) / sizeof(char);
+	int linhas = sizeof(msg.lab.maze) / colunas;
+	
+	for(int i = 0; i < linhas * colunas; i++){
+			int posx = msg.lab.elementos[i].x;
+			int posy = msg.lab.elementos[i].y;
+			char avatar = msg.lab.elementos[i].avatar;
+			if(posx == x && posy == y && avatar == 'P')
+				return true;
+	}
+	
+	return false;
+}
+void abreSaida(){
+	int colunas = sizeof(msg.lab.maze[0]) / sizeof(char);
+	int linhas = sizeof(msg.lab.maze) / colunas;
+	
+	for(int i = 0; i < linhas * colunas; i++){
+			int posx = msg.lab.elementos[i].x;
+			int posy = msg.lab.elementos[i].y;
+			char avatar = msg.lab.elementos[i].avatar;
+			if(avatar == 'S')
+				msg.lab.elementos[i].avatar = 'Z';
+	}
+}
+
+void esvaziarPosicao(int x, int y){
+	int colunas = sizeof(msg.lab.maze[0]) / sizeof(char);
+	int linhas = sizeof(msg.lab.maze) / colunas;
+	
+	for(int i = 0; i < linhas * colunas; i++){
+		int posx = msg.lab.elementos[i].x;
+		int posy = msg.lab.elementos[i].y;
+		char avatar = msg.lab.elementos[i].avatar;
+		if(posx == x && posy == y)
+			msg.lab.elementos[i].avatar = ' ';
+		
+	}
+}
+bool verificaMovimento(char tipo[]){
+	int xAtual, yAtual;
+	int xObj, yObj;
+	xAtual = msg.lab.jogadores[0].x;
+	yAtual = msg.lab.jogadores[0].y;
+	
+	
+	
+	if(tipo[0] == 'w'){
+		xObj = xAtual;
+		yObj = yAtual - 1;
+		if(!temParede(xObj, yObj)){
+			if(temObjeto(xObj, yObj)){
+				msg.lab.numObjetosPontos++;
+				esvaziarPosicao(xObj, yObj);	
+			}
+			if(msg.lab.totalObjetos == msg.lab.numObjetosPontos)
+				abreSaida();
+			return true;
+			
+			
+		}
+	}
+	else if(tipo[0] == 's'){
+		xObj = xAtual;
+		yObj = yAtual + 1;
+		if(!temParede(xObj, yObj)){
+			if(temObjeto(xObj, yObj)){
+				msg.lab.numObjetosPontos++;
+				esvaziarPosicao(xObj, yObj);	
+			}
+			if(msg.lab.totalObjetos == msg.lab.numObjetosPontos)
+				abreSaida();
+			return true;
+		}   
+	}
+	else if(tipo[0] == 'a'){
+		xObj = xAtual - 1;
+		yObj = yAtual;
+		if(!temParede(xObj, yObj)){
+			if(temObjeto(xObj, yObj)){
+				msg.lab.numObjetosPontos++;
+				esvaziarPosicao(xObj, yObj);	
+			}
+			if(msg.lab.totalObjetos == msg.lab.numObjetosPontos)
+				abreSaida();
+			return true;
+
+		}
+	}
+	
+	else if(tipo[0] == 'd'){
+		xObj = xAtual + 1;
+		yObj = yAtual;
+		if(!temParede(xObj, yObj)){
+			if(temObjeto(xObj, yObj)){
+				msg.lab.numObjetosPontos++;
+				esvaziarPosicao(xObj, yObj);	
+			}
+			if(msg.lab.totalObjetos == msg.lab.numObjetosPontos)
+				abreSaida();
+			
+			return true;
+		}
+	}
+	else if(tipo[0] == 'b'){
+		if(msg.lab.jogadores[0].bombinhas > 0){
+			msg.lab.jogadores[0].bombinhas--;
+			return true;
+		}
+	}
+		
+	return false;
+}
 
 //---------PROCESSAMETO-DE-PEDIDOS---------//
 void *processaPedidos(void *arg){
@@ -340,15 +476,35 @@ void *processaPedidos(void *arg){
 			fd_cliente = open(msg.endereco, O_RDWR); 	// ABRIR "CP" DO CLIENTE (open - O_WRONLY)
 			write(fd_cliente, &msg, sizeof(msg)); 		// ENVIAR RESPOSTA PARA A "CP" DO CLIENTE (write)
 			close(fd_cliente); 	
-		}else if(strcmp(msg.op1,"iniciar")==0){
+		}
+		else if(strcmp(msg.op1,"movimento")==0){
+			if(verificaMovimento(msg.op2)){
+				strcpy(msg.resposta,"s");
+				printf("[SERVIDOR] Movimento validado. [%s]\n", msg.endereco);
+			}			
+				
+			else{
+				strcpy(msg.resposta,"n");
+				printf("[SERVIDOR] Movimento negado. [%s]\n", msg.endereco);
+			}
+				
+			
+			fd_cliente = open(msg.endereco, O_RDWR); 	// ABRIR "CP" DO CLIENTE (open - O_WRONLY)
+			write(fd_cliente, &msg, sizeof(msg)); 		// ENVIAR RESPOSTA PARA A "CP" DO CLIENTE (write)
+			close(fd_cliente); 	
+		}
+		else if(strcmp(msg.op1,"iniciar")==0){
 			strcpy(msg.resposta,"...INICIAR...\n");
 			printf("[SERVIDOR] A Iniciar... \n");
+			msg.lab.totalObjetos = 0;
+			msg.lab.numObjetosPontos = 0;
 			adicionaJogador();
 			updateLabirinto();
 			fd_cliente = open(msg.endereco, O_RDWR); 	// ABRIR "CP" DO CLIENTE (open - O_WRONLY)
 			write(fd_cliente, &msg, sizeof(msg)); 		// ENVIAR RESPOSTA PARA A "CP" DO CLIENTE (write)
 			close(fd_cliente); 
-		}else if(strcmp(msg.op1,"sair")==0){
+		}
+		else if(strcmp(msg.op1,"sair")==0){
 			strcpy(msg.resposta,"O Jogador abandonou o jogo.\n");
 			
 			v = updateSaida(msg.endereco);
@@ -357,14 +513,16 @@ void *processaPedidos(void *arg){
 			write(fd_cliente, &msg, sizeof(msg)); 		// ENVIAR RESPOSTA PARA A "CP" DO CLIENTE (write)
 			close(fd_cliente); 	
 			
-		}else if(strcmp(msg.op1,"novo")==0){
+		}
+		else if(strcmp(msg.op1,"novo")==0){
 			strcpy(msg.resposta,"Bem-vindo ao jogo.\n");
 			printf("[SERVIDOR] [%s] entrou no jogo.\n", msg.endereco);
 			fd_cliente = open(msg.endereco, O_RDWR); 	// ABRIR "CP" DO CLIENTE (open - O_WRONLY)
 			write(fd_cliente, &msg, sizeof(msg)); 		// ENVIAR RESPOSTA PARA A "CP" DO CLIENTE (write)
 			close(fd_cliente); 	
 			
-		}else if(strcmp(msg.op1,"login")==0){
+		}
+		else if(strcmp(msg.op1,"login")==0){
 			if(validaLogin(msg.op2, msg.op3, msg.endereco) == 1){
 				printf("[SERVIDOR] Credenciais do cliente [%s] validadas com sucesso.\n", msg.endereco);
 

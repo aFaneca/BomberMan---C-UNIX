@@ -7,6 +7,7 @@
 #include <sys/stat.h>
 #include <signal.h>
 #include <pthread.h>
+#include <stdbool.h>
 #define TAM 25
 
 
@@ -14,11 +15,15 @@
 typedef struct Elemento {
 	int x, y;
 	char avatar;
+	int bombinhas;
+	int megabombas;
+	char ultimoMovimento;
 } elemento;
 
 typedef struct Labirinto {
 	char maze[20][30];
 	int numObjetosPontos;
+	int totalObjetos;
 	int numObjetosDest;
 	elemento elementos[1000];
 	elemento jogadores[10];
@@ -65,5 +70,8 @@ jogador* add(char *cmd[], int *conta);
 jogador* kick(char *cmd[], int conta);
 
 void buscaMapInfo(labirinto *mv, int nMapas);
+bool temObjeto(int x, int y);
+void esvaziarPosicao(int x, int y);
+void mudaChar(int x, int y, char avatar);
 void *processaPedidos();
 void updateLabirinto();

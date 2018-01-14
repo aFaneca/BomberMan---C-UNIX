@@ -85,117 +85,253 @@ char ** processaComando(char *comando, int *tamCMD) {
 
 	return cmd;
 }
+
+void terminaJogo(){
+	move(55,1);
+	printw("Terminou o jogo. Cliquem em 'q' para sair.");
+}
+
+
+bool estaNaSaida(int x, int y){
+	int colunas = sizeof(msg.lab.maze[0]) / sizeof(char);
+	int linhas = sizeof(msg.lab.maze) / colunas;
+	
+	for(int i = 0; i < linhas * colunas; i++){
+			int posx = msg.lab.elementos[i].x;
+			int posy = msg.lab.elementos[i].y;
+			char avatar = msg.lab.elementos[i].avatar;
+			if(posx == x && posy == y && avatar == 'Z')
+				return true;
+	}
+	
+	return false;
+}
+
 void mostraLabirinto(){
-	erase();
+
+	//erase();
 	int colunas = sizeof(lab.maze[0]) / sizeof(char);
 	int linhas = sizeof(lab.maze) / colunas;
 	int nJogadores = sizeof(msg.lab.jogadores)/sizeof(msg.lab.jogadores[0]);
-	printf("\n%d %d", linhas, colunas);
+	//printf("\n%d %d", linhas, colunas);
+	start_color();
+	init_pair(1, COLOR_MAGENTA, COLOR_MAGENTA); // PAREDES
+	init_pair(2, COLOR_BLACK, COLOR_WHITE); //NORMAL
+	init_pair(3, COLOR_BLUE, COLOR_BLUE); // PAREDES DESTRUIVEIS
+	init_pair(4, COLOR_RED, COLOR_RED); // SAIDA
+	init_pair(5, COLOR_WHITE, COLOR_WHITE); // SAIDA ABERTA
 	
+	
+	move(5,40);
+	
+	printw("OBJETOS APANHADOS: %d/%d", msg.lab.numObjetosPontos, msg.lab.totalObjetos);	
+	move(6,40);
+	printw("Bombinhas: %d", msg.lab.jogadores[0].bombinhas);
+	move(7,40);
+	printw("Megabombas: %d", msg.lab.jogadores[0].megabombas);
 	//IMPRIME MUNDO
 	for(int i = 0; i < linhas*colunas; i++){
 		int posx = msg.lab.elementos[i].x;
 		int posy = msg.lab.elementos[i].y;
 		char avatar = msg.lab.elementos[i].avatar;
-		mvaddch(posy,posx,avatar);	
+		if(avatar == '0'){
+			attron(COLOR_PAIR(1));
+			move(posy, posx);
+			printw("%c", avatar);
+			
+			attroff(COLOR_PAIR(1));
+		}else if(avatar == 'D'){
+			attron(COLOR_PAIR(3));
+			move(posy, posx);
+			printw("%c", avatar);
+			
+			attroff(COLOR_PAIR(3));
+		}else if(avatar == 'S'){
+			attron(COLOR_PAIR(4));
+			move(posy, posx);
+			printw("%c", avatar);
+			attroff(COLOR_PAIR(4));
+		}else if(avatar == 'Z'){
+			attron(COLOR_PAIR(5));
+			move(posy, posx);
+			printw("%c", avatar);
+			
+			attroff(COLOR_PAIR(5));
+		}
+		else{
+			attron(COLOR_PAIR(2));
+			//attron(COLOR_PAIR(1));
+			move(posy, posx);
+			printw("%c", avatar);
+			//mvaddch(posy,posx,avatar);
+			attroff(COLOR_PAIR(2));
+		}
 	}
-	
 	//IMPRIME JOGADORES NO MUNDO
-	for(int i = 0; i < nJogadores; i++){
+	for(int i = 0; i < 1; i++){
 		int posx = msg.lab.jogadores[i].x;
 		int posy = msg.lab.jogadores[i].y;
 		char avatar = msg.lab.jogadores[i].avatar;
 		mvaddch(posy,posx,avatar);	
+		if(estaNaSaida(posx, posy))
+		   terminaJogo();
 	}
 	
 	
+	
 }
+
+bool validaMovimento (char mov){
+	char str[2];
+	str[0] = mov;
+	str[1] = '\0';
+	strcpy(msg.op1, "movimento"); 	
+	strcpy(msg.op2, str);
+    write(fd_servidor, &msg, sizeof(msg)); 		// ENVIAR PEDIDO PARA "CP" DO SERVIDOR (write) 	
+    fd_cliente = open(msg.endereco, O_RDONLY); 	// ABRIR "CP" DO CLIENTE (open - O_RDONLY)
+	read(fd_cliente, &msg, sizeof(msg));		// RECEBER RESPOSTA NA "CP" DO CLIENTE (read)
+	close(fd_cliente);
+	if(strcmp(msg.resposta, "s") == 0)
+		return true;
+	else
+		return false;
+    
+}
+bool posLivre(int x, int y){
+	int colunas = sizeof(msg.lab.maze[0]) / sizeof(char);
+	int linhas = sizeof(msg.lab.maze) / colunas;
 	
+	for(int i = 0; i < linhas * colunas; i++){
+			int posx = msg.lab.elementos[i].x;
+			int posy = msg.lab.elementos[i].y;
+			char avatar = msg.lab.elementos[i].avatar;
+			if(posx == x && posy == y && (avatar == '0' || avatar == 'S' || avatar == 'D'))
+				return false;
+	}
+	
+	return true;
+	
+}
+
+void lancaBombinha(){
+	int posx = msg.lab.jogadores[0].x;
+	int posy = msg.lab.jogadores[0].y;
+	int bX, bY;
+	int movimento = msg.lab.jogadores[0].ultimoMovimento;
+	bool podeLancar = false;
+	
+	if(movimento == 'w'){
+		bX = posx; bY = posy - 1;
+		if(posLivre(bX, bY))
+		   podeLancar = true;
+	}
+	else if(movimento == 's'){
+		bX = posx; bY = posy + 1;
+		if(posLivre(bX, bY))
+		   podeLancar = true;
+	}
+	else if(movimento == 'a'){
+		bX = posx - 1; bY = posy;
+		if(posLivre(bX, bY))
+		  podeLancar = true;
+	}
+	else if(movimento == 'd'){
+		bX = posx + 1; bY = posy;
+		if(posLivre(bX, bY))
+		   podeLancar = true;
+	}
+	
+	if(podeLancar){
+		int colunas = sizeof(msg.lab.maze[0]) / sizeof(char);
+		int linhas = sizeof(msg.lab.maze) / colunas;
+	
+		for(int i = 0; i < linhas * colunas; i++){
+			int posx1 = msg.lab.elementos[i].x;
+			int posy1 = msg.lab.elementos[i].y;
+			char avatar = msg.lab.elementos[i].avatar;
+			if(posx1 == bX && posy1 == bY)
+				msg.lab.elementos[i].avatar = 'b';
+		}
+	}
+}
+
 void iniciarJogo(){
+	/*
+	//ThrDados tdados[2];
+    pthread_t jogo;
+	//strcpy(tdados[0].qual, msg.endereco); 
+	//tdados[0].fd = fd_cliente;
 	
-    bool fim = false;
-	//clear();
-	
-    //cbreak();
-    
-    
-	//keypad(janela1, TRUE);
-	//nodelay(janela1, TRUE);
-    //scrollok(janela1, TRUE);
-	char c;
-	int x,y;
+	if(pthread_create(&jogo, NULL, &jogadas, NULL) != 0)
+			printf("Erro a criar a thread...");
+	*/
+	bool continuar = true;
+	WINDOW * janela;
+	fflush(stdout);
+    msg.lab.numObjetosPontos = 0;
     /*  Initialize ncurses  */
-/*	
-    if ( (initscr()) == NULL ) {
-		fprintf(stderr, "Erro a inicializar nCurses...\n");
+
+    if ( (janela = initscr()) == NULL ) {
+	fprintf(stderr, "Erro a inicializar o nCurses.\n");
 	exit(EXIT_FAILURE);
     }
-
-	while(!fim){
-		werase(janela1);
-		mostraLabirinto();
-		refresh();
-		if(c == 27){
-			fim = true;
-		}
-
-  */      
-    initscr();
-	//keypad(stdscr, TRUE);
 	noecho();
-	mostraLabirinto();
-	refresh();
-	
-		
-        
- /*
- 	    case KEY_RIGHT:
-        {
-            x++;
-            move(y,x);
-        }
-        case KEY_LEFT:
-        {
-            x--;
-            move(y,x);
-        }
-        case KEY_UP:
-        {
-            y--;
-            move(y,x);
-        }
-        case KEY_DOWN:
-        {
-            y++;
-            move(y,x);
-        }
-        case KEY_EXIT:
-        {
-            printf("Bye");
-			fim = true;
-        }
-        default:
-        {
-            printw("%c",c);
-        }
-*/
-    
-   			 
-	//}
-	
-	
-	
+	clear();
+	curs_set(0);
+	move(1,1);
     /*  Display "Hello, world!" in the centre of the
 	screen, call refresh() to show our changes, and
 	sleep() for a few seconds to get the full screen effect  */
-	
+	while(continuar){
+		clear();
+		mostraLabirinto();
+		refresh();
+		while(1){
+			
+			char c = wgetch(janela);
+			if(c == 'q'){continuar = false; break;}
+			if(c == 'w'){
+				if(validaMovimento('w')){
+					msg.lab.jogadores[0].y--; 
+					msg.lab.jogadores[0].ultimoMovimento = 'w';	
+					break;
+				}
+			}
+			if(c == 's'){
+				if(validaMovimento('s')){
+					msg.lab.jogadores[0].y++; 
+					msg.lab.jogadores[0].ultimoMovimento = 's';	
+					break;
+				}
+			}
+			if(c == 'a'){
+				if(validaMovimento('a')){
+					msg.lab.jogadores[0].x--;
+					msg.lab.jogadores[0].ultimoMovimento = 'a';	
+					break;
+				}
+			}
+			if(c == 'd'){
+				if(validaMovimento('d')){
+					msg.lab.jogadores[0].x++;
+					msg.lab.jogadores[0].ultimoMovimento = 'd';	
+					break;
+				}
+			}
+			if(c == 'b'){
+				if(validaMovimento('b')){
+					//msg.lab.jogadores[0].x++;
+					lancaBombinha();
+					break;
+				}
+			}
+		}
+	}
 
-    
-   // sleep(10);
-	
-	// LIMPEZA
-	//delwin();
-	//endwin();
-    
-	
+
+    /*  Clean up after ourselves  */
+
+    delwin(janela);
+    endwin();
+    refresh();
 }
