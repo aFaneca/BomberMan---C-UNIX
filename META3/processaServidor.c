@@ -275,12 +275,12 @@ void trata(int sinal){
 }
 
 
+//------------MAPA------------------//
 
 void updateLabirinto(){
 	
 	int colunas = sizeof(msg.lab.maze[0]) / sizeof(char);
 	int linhas = sizeof(msg.lab.maze) / colunas;
-	char letraLida[colunas];
 	
 	FILE *f = fopen("mapa1.txt", "r");
 	if (f == NULL) {
@@ -322,14 +322,12 @@ void adicionaJogador(){
 	msg.lab.jogadores[i].x = 1;
 	msg.lab.jogadores[i].y = 1;
 	msg.lab.jogadores[i].avatar = 158;
-	msg.lab.jogadores[i].bombinhas = 300;
+	msg.lab.jogadores[i].bombinhas = 3;
 	msg.lab.jogadores[i].megabombas = 2;
 }
+
 bool temParede(int x, int y){
-	/*if(msg.lab.maze[x][y] == '0')
-		return false;
-	return true;
-*/
+
 	int colunas = sizeof(msg.lab.maze[0]) / sizeof(char);
 	int linhas = sizeof(msg.lab.maze) / colunas;
 	
@@ -358,13 +356,12 @@ bool temObjeto(int x, int y){
 	
 	return false;
 }
+
 void abreSaida(){
 	int colunas = sizeof(msg.lab.maze[0]) / sizeof(char);
 	int linhas = sizeof(msg.lab.maze) / colunas;
 	
 	for(int i = 0; i < linhas * colunas; i++){
-			int posx = msg.lab.elementos[i].x;
-			int posy = msg.lab.elementos[i].y;
 			char avatar = msg.lab.elementos[i].avatar;
 			if(avatar == 'S')
 				msg.lab.elementos[i].avatar = 'Z';
@@ -378,12 +375,12 @@ void esvaziarPosicao(int x, int y){
 	for(int i = 0; i < linhas * colunas; i++){
 		int posx = msg.lab.elementos[i].x;
 		int posy = msg.lab.elementos[i].y;
-		char avatar = msg.lab.elementos[i].avatar;
 		if(posx == x && posy == y)
 			msg.lab.elementos[i].avatar = ' ';
 		
 	}
 }
+
 bool verificaMovimento(char tipo[]){
 	int xAtual, yAtual;
 	int xObj, yObj;
@@ -454,9 +451,16 @@ bool verificaMovimento(char tipo[]){
 			return true;
 		}
 	}
+	else if(tipo[0] == 'M'){
+		if(msg.lab.jogadores[0].megabombas > 0){
+			return true;
+		}
+	}
 		
 	return false;
 }
+
+
 
 //---------PROCESSAMETO-DE-PEDIDOS---------//
 void *processaPedidos(void *arg){
@@ -541,8 +545,6 @@ void *processaPedidos(void *arg){
 }
 
 
-
-
 //---------PROCESSAMETO-DE-COMANDOS---------//
 
 char ** processaComando(char *comando, int *tamCMD) {
@@ -567,42 +569,6 @@ char ** processaComando(char *comando, int *tamCMD) {
 }
 
 
-//------------MAPA------------------//
 
-void buscaMapInfo(labirinto *mv, int nMapas){
 
-	int i = 0;
-	int k = 0;
-	int pos = (nMapas - 1);
-	char c;
-	FILE *f = fopen("mapa1.txt", "r");
-
-	if(f == NULL){
-		printf("Erro a abrir ficheiro");
-	}
-
-	while((c = getc(f)) != EOF){
-		if(k == 30 && i == 19){
-			break;
-		}
-		
-		if(k == 30){
-			i++;
-			k=0;
-		}
-		
-		if(c != '\n'){
-			mv[0].maze[i][k] = c;
-			k++;
-		}
-		
-		if(c == 'P'){
-			mv[pos].numObjetosPontos++;
-		}
-		if(c == 'D'){
-			mv[pos].numObjetosDest++;
-		}
-	}
-	fclose(f);
-}
 

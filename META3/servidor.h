@@ -8,9 +8,10 @@
 #include <signal.h>
 #include <pthread.h>
 #include <stdbool.h>
+#include <time.h>
+
+#define INIMIGOS 5
 #define TAM 25
-
-
 
 typedef struct Elemento {
 	int x, y;
@@ -51,7 +52,7 @@ typedef struct dados_pipes{
 
 jogador *v;
 int fd_servidor, fd_cliente, n;
-const char nomeFicheiro[];
+const char nomeFicheiro[100];
 MENSAGEM msg;
 labirinto lab;
 
@@ -69,9 +70,10 @@ int contaPlayersRegistados();
 jogador* add(char *cmd[], int *conta);
 jogador* kick(char *cmd[], int conta);
 
-void buscaMapInfo(labirinto *mv, int nMapas);
 bool temObjeto(int x, int y);
 void esvaziarPosicao(int x, int y);
 void mudaChar(int x, int y, char avatar);
 void *processaPedidos();
 void updateLabirinto();
+void criaInimigos();
+void lancaMegaBomba();

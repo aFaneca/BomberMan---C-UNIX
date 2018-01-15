@@ -27,11 +27,6 @@ int main(int argc, char *argv[]) {
 	int total = contaPlayersRegistados();
 	v = malloc(sizeof(jogador)*total);
 	buscaLogs(ficheiroLogin);
-
-	labirinto *mv;
-	mv = malloc(sizeof(labirinto));
-	int nMapas = 1;
-	buscaMapInfo(mv, nMapas);
 	
 	
 	/* VERIFICAR SE EXISTE "CP" DO SERVIDOR -- APENAS UM!!!*/
@@ -104,14 +99,14 @@ int main(int argc, char *argv[]) {
 			}
 		}else if (strcmp(cmd[0], "game") == 0) {
 			if (tamCMD == 1){
-				gameInfo(mv, total, nMapas);
+				//gameInfo(mv, total, nMapas);
 			}else{
 				printf("Erro de Sintaxe. <game>\n");
 			}
 		}
 		else if (strcmp(cmd[0], "shutdown") == 0) {
 			if (tamCMD == 1){
-				free(mv);
+				//free(mv);
 				
 				printf("[SERVIDOR] SERVIDOR DESLIGADO\n");
     			close(fd_servidor); 	// FECHAR "CP" DO SERVIDOR

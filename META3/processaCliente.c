@@ -87,10 +87,10 @@ char ** processaComando(char *comando, int *tamCMD) {
 }
 
 void terminaJogo(){
+	
 	move(55,1);
 	printw("Terminou o jogo. Cliquem em 'q' para sair.");
 }
-
 
 bool estaNaSaida(int x, int y){
 	int colunas = sizeof(msg.lab.maze[0]) / sizeof(char);
@@ -112,7 +112,6 @@ void mostraLabirinto(){
 	//erase();
 	int colunas = sizeof(lab.maze[0]) / sizeof(char);
 	int linhas = sizeof(lab.maze) / colunas;
-	int nJogadores = sizeof(msg.lab.jogadores)/sizeof(msg.lab.jogadores[0]);
 	//printf("\n%d %d", linhas, colunas);
 	start_color();
 	init_pair(1, COLOR_MAGENTA, COLOR_MAGENTA); // PAREDES
@@ -129,6 +128,8 @@ void mostraLabirinto(){
 	printw("Bombinhas: %d", msg.lab.jogadores[0].bombinhas);
 	move(7,40);
 	printw("Megabombas: %d", msg.lab.jogadores[0].megabombas);
+	move(8,40);
+	printw("SCORE: %d", msg.lab.numObjetosPontos);
 	//IMPRIME MUNDO
 	for(int i = 0; i < linhas*colunas; i++){
 		int posx = msg.lab.elementos[i].x;
@@ -177,7 +178,7 @@ void mostraLabirinto(){
 		   terminaJogo();
 	}
 	
-	
+refresh();	
 	
 }
 
@@ -197,6 +198,7 @@ bool validaMovimento (char mov){
 		return false;
     
 }
+
 bool posLivre(int x, int y){
 	int colunas = sizeof(msg.lab.maze[0]) / sizeof(char);
 	int linhas = sizeof(msg.lab.maze) / colunas;
@@ -205,12 +207,28 @@ bool posLivre(int x, int y){
 			int posx = msg.lab.elementos[i].x;
 			int posy = msg.lab.elementos[i].y;
 			char avatar = msg.lab.elementos[i].avatar;
-			if(posx == x && posy == y && (avatar == '0' || avatar == 'S' || avatar == 'D'))
+			if(posx == x && posy == y && (avatar == '0' || avatar == 'S' || avatar == 'D' || avatar == 'P')){
 				return false;
+			}
 	}
 	
 	return true;
+}
+
+bool posLivreInimigo(int x, int y){
+	int colunas = sizeof(msg.lab.maze[0]) / sizeof(char);
+	int linhas = sizeof(msg.lab.maze) / colunas;
 	
+	for(int i = 0; i < linhas * colunas; i++){
+			int posx = msg.lab.elementos[i].x;
+			int posy = msg.lab.elementos[i].y;
+			char avatar = msg.lab.elementos[i].avatar;
+			if(posx == x && posy == y && (avatar != ' ')){
+				return false;
+			}
+	}
+	
+	return true;
 }
 
 
@@ -224,32 +242,96 @@ void* explodeBomba(void * dados){
 	int y = x1->y;
 	if(tipo == 'b')
 		raio = 2;
-	else if(tipo == 'm')
+	else if(tipo == 'M')
 		raio = 4;
 	
+	
 	sleep(2);
-	// MOSTRAR RAIO EXPLOSAO
-	//sleep(2);
+	for(int i = 0; i < linhas * colunas; i++){
+			int posx = msg.lab.elementos[i].x;
+			int posy = msg.lab.elementos[i].y;
+			char avatar = msg.lab.elementos[i].avatar;
+		for(int h = 0; h < raio + 1; h++){
+			if((posx == x && posy == y + h) || (posx == x && posy == y - h) || (posx == x + h && posy == y) || (posx == x - h && posy == y)){
+				if(avatar == 'D' || avatar == ' ' || avatar == 'X' || avatar == 'J' /*|| avatar == (char)158 */|| avatar == ' '){ // D - Blocos Destrutiveis | X - Inimigos | J - Outros Jogadores | A - ELE PROPRIO
+					// EXPLODIR
+					msg.lab.elementos[i].avatar = '+';	
+				}
+			}
+		}
+	}
+	mostraLabirinto();
+	sleep(2);
 	for(int i = 0; i < linhas * colunas; i++){
 			int posx = msg.lab.elementos[i].x;
 			int posy = msg.lab.elementos[i].y;
 			char avatar = msg.lab.elementos[i].avatar;
 			
 		for(int h = 0; h < raio + 1; h++){
-				if((posx == x && posy == y + h) || (posx == x && posy == y - h) || (posx == x + h && posy == y) || (posx == x - h && posy == y)){
-					if(avatar == 'D' || avatar == 'X' || avatar == 'J' || avatar == (char)158 || avatar == 'b'){ // D - Blocos Destrutiveis | X - Inimigos | J - Outros Jogadores | A - ELE PROPRIO
-						// EXPLODIR
-						msg.lab.elementos[i].avatar = ' ';
-					}
+			if((posx == x && posy == y + h) || (posx == x && posy == y - h) || (posx == x + h && posy == y) || (posx == x - h && posy == y)){
+				if(avatar == '+' || avatar == 'b' || avatar == 'M'){ // D - Blocos Destrutiveis | X - Inimigos | J - Outros Jogadores | A - ELE PROPRIO
+					msg.lab.elementos[i].avatar = ' ';
+					
 				}
+			}
 		}
 		
-
-	
 	}
-	
+	mostraLabirinto();
 	return NULL;
 }
+
+void lancaMegaBomba(){
+	int posx = msg.lab.jogadores[0].x;
+	int posy = msg.lab.jogadores[0].y;
+	int bX, bY;
+	int movimento = msg.lab.jogadores[0].ultimoMovimento;
+	bool podeLancar = false;
+	pthread_t bomba;
+	argsBomba *args_bomba = (argsBomba *) malloc(sizeof(argsBomba));
+	
+	if(movimento == 'w'){
+		bX = posx; bY = posy - 1;
+		if(posLivre(bX, bY))
+		   podeLancar = true;
+	}
+	else if(movimento == 's'){
+		bX = posx; bY = posy + 1;
+		if(posLivre(bX, bY))
+		   podeLancar = true;
+	}
+	else if(movimento == 'a'){
+		bX = posx - 1; bY = posy;
+		if(posLivre(bX, bY))
+		  podeLancar = true;
+	}
+	else if(movimento == 'd'){
+		bX = posx + 1; bY = posy;
+		if(posLivre(bX, bY))
+		   podeLancar = true;
+	}
+	
+	if(podeLancar){
+		int colunas = sizeof(msg.lab.maze[0]) / sizeof(char);
+		int linhas = sizeof(msg.lab.maze) / colunas;
+	
+		for(int i = 0; i < linhas * colunas; i++){
+			int posx1 = msg.lab.elementos[i].x;
+			int posy1 = msg.lab.elementos[i].y;
+			if(posx1 == bX && posy1 == bY){
+				msg.lab.elementos[i].avatar = 'M';
+				msg.lab.jogadores[0].megabombas--;
+				mostraLabirinto();
+				refresh();
+				args_bomba->x = bX;
+				args_bomba->y = bY;
+				args_bomba->tipo = 'M';
+				pthread_create(&bomba, NULL, &explodeBomba, (void *) args_bomba);
+			}
+		}
+	}
+}
+
 
 void lancaBombinha(){
 	int posx = msg.lab.jogadores[0].x;
@@ -288,7 +370,6 @@ void lancaBombinha(){
 		for(int i = 0; i < linhas * colunas; i++){
 			int posx1 = msg.lab.elementos[i].x;
 			int posy1 = msg.lab.elementos[i].y;
-			char avatar = msg.lab.elementos[i].avatar;
 			if(posx1 == bX && posy1 == bY){
 				msg.lab.elementos[i].avatar = 'b';
 				msg.lab.jogadores[0].bombinhas--;
@@ -297,23 +378,123 @@ void lancaBombinha(){
 				args_bomba->x = bX;
 				args_bomba->y = bY;
 				args_bomba->tipo = 'b';
-				//explodeBomba('b', bX, bY);
+
 				pthread_create(&bomba, NULL, &explodeBomba, (void *) args_bomba);
 			}
 		}
 	}
 }
 
-void iniciarJogo(){
-	/*
-	//ThrDados tdados[2];
-    pthread_t jogo;
-	//strcpy(tdados[0].qual, msg.endereco); 
-	//tdados[0].fd = fd_cliente;
+void atualizaElemento(int x, int y){
+
+	int colunas = sizeof(lab.maze[0]) / sizeof(char);
+	int linhas = sizeof(lab.maze) / colunas;
 	
-	if(pthread_create(&jogo, NULL, &jogadas, NULL) != 0)
-			printf("Erro a criar a thread...");
-	*/
+	for(int i = 0; i < linhas * colunas; i++){
+		int posX = msg.lab.elementos[i].x;
+		int posY = msg.lab.elementos[i].y;
+
+		if(x == posX && y == posY){
+			msg.lab.elementos[i].avatar = 'I';
+			break;
+		}			
+	}
+
+}
+
+
+void limpaMovimento(int x, int y){
+	
+	int colunas = sizeof(lab.maze[0]) / sizeof(char);
+	int linhas = sizeof(lab.maze) / colunas;
+	
+	for(int i = 0; i < linhas * colunas; i++){
+		int posX = msg.lab.elementos[i].x;
+		int posY = msg.lab.elementos[i].y;
+
+		if(x == posX && y == posY){
+			msg.lab.elementos[i].avatar = ' '; 
+		}			
+	}	
+}
+
+void * movimentaInimigos(){
+	
+	srand(time(NULL));
+	int mov;
+	
+	int colunas = sizeof(lab.maze[0]) / sizeof(char);
+	int linhas = sizeof(lab.maze) / colunas;
+	
+	while(1){
+			for(int i = 0; i < linhas * colunas; i++){
+				if(msg.lab.elementos[i].avatar == 'I'){
+					int xObj = msg.lab.elementos[i].x;
+					int yObj = msg.lab.elementos[i].y;
+					while(1){
+						mov = rand() %4;
+
+						if(mov == 0 && posLivreInimigo(xObj - 1, yObj) == true){	
+							limpaMovimento(xObj, yObj);
+
+							//msg.lab.elementos[i].x--;				
+							atualizaElemento(xObj - 1, yObj);
+							break;
+						}else if(mov == 1 && posLivreInimigo(xObj + 1, yObj) == true){
+							
+							limpaMovimento(xObj, yObj);				
+							atualizaElemento(xObj + 1, yObj);
+							break;
+						}else if(mov == 2 && posLivreInimigo(xObj, yObj - 1) == true){
+							
+							limpaMovimento(xObj, yObj);				
+							atualizaElemento(xObj, yObj - 1);
+							break;
+						}else if(mov == 3 && posLivreInimigo(xObj, yObj + 1) == true){
+							
+							limpaMovimento(xObj, yObj);				
+							atualizaElemento(xObj, yObj+1);
+							break;
+						}
+					}
+				}
+				
+			}
+		mostraLabirinto();
+		refresh();
+		
+		sleep(1);
+	}
+	
+	return NULL;
+}
+
+void criaInimigos(){
+	
+	int quants = INIMIGOS;
+	
+	time_t t;
+	int colunas = sizeof(lab.maze[0]) / sizeof(char);
+	int linhas = sizeof(lab.maze) / colunas;
+	srand((unsigned) time(&t));
+	
+	while(quants > 0){
+		int x = rand() % colunas;
+		int y = rand() % linhas;
+		
+			for(int i = 0; i < linhas * colunas; i++){
+				int posx = msg.lab.elementos[i].x;
+				int posy = msg.lab.elementos[i].y;
+				if(posx == x && posy == y && msg.lab.elementos[i].avatar == ' '){
+					msg.lab.elementos[i].avatar = 'I';
+					quants--;
+				}
+			}		
+	}
+
+}
+
+void iniciarJogo(){
 	bool continuar = true;
 	WINDOW * janela;
 	fflush(stdout);
@@ -328,6 +509,12 @@ void iniciarJogo(){
 	clear();
 	curs_set(0);
 	move(1,1);
+	pthread_t inimigos;
+	
+	criaInimigos();
+	pthread_create(&inimigos, NULL, &movimentaInimigos, NULL);
+	
+	
 
 	while(continuar){
 		clear();
@@ -369,18 +556,24 @@ void iniciarJogo(){
 				if(validaMovimento('b')){
 					//msg.lab.jogadores[0].x++;
 					lancaBombinha();
-					
+					break;
+				}
+			}
+			if(c == 'm'){
+				if(validaMovimento('M')){
+					//msg.lab.jogadores[0].x++;
+					lancaMegaBomba();
 					break;
 				}
 			}
 		}
 	}
-
-
-    /*  Clean up after ourselves  */
+	/*  LIMPEZA  */
 
     delwin(janela);
     endwin();
     refresh();
+
+    
 }
 

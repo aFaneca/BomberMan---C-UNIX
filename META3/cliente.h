@@ -8,8 +8,10 @@
 #include <signal.h>
 #include <curses.h>
 #include <stdbool.h>
-
+#include <time.h>
+#include <pthread.h>
 #define TAM 25
+#define INIMIGOS 5
 
 
 typedef struct Elemento {
@@ -73,3 +75,8 @@ bool estaNaSaida(int x, int y);
 void terminaJogo();
 void lancaBombinha();
 void* explodeBomba(void * dados);
+void criaInimigos();
+void * movimentaInimigos();
+void limpaMovimento(int x, int y);
+void atualizaElemento(int x, int y);
+bool posLivreInimigo(int x, int y);
